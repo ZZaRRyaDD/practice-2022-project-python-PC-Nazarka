@@ -1,0 +1,17 @@
+import os
+
+from celery import Celery, schedules
+
+from .settings.locale import TIME_ZONE
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+app = Celery('config')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
+app.conf.update(
+    task_serializer='json',
+    accept_content=['json'],
+    result_serializer='json',
+    timezone=TIME_ZONE,
+    enable_utc=True,
+)

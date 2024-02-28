@@ -1,0 +1,44 @@
+version: '3.3'
+services:
+  server:
+    build:
+      context: ./
+      dockerfile: ./server/Dockerfile
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./server:/server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      DEBUG: 'True'
+      DATABASE_URL: 'postgres://postgres:postgres@db:5432/postgres'
+
+  db:
+    image: postgres:12.4-alpine
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+  celery:
+    build:
+      context: ./
+      dockerfile: ./server/Dockerfile
+    volumes:
+      - ./server:/server
+    command: celery --app=config worker --beat -l debug
+    environment:
+      DEBUG: 'True'
+      DATABASE_URL: 'postgres://postgres:postgres@db:5432/postgres'
+    depends_on:
+      - server
+      - redis
+    ports: []
+
+  redis:
+    image: redis:6
+    ports:
+      - 6379:6379

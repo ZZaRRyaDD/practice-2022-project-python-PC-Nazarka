@@ -1,0 +1,1 @@
+MIN_COUNT_MONTHS = 1
